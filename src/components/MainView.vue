@@ -2,8 +2,8 @@
   <div class="leftContainer">
     <div id="cityNameBox">
         <div class="cityName">
-            <p>A</p>
-            <p>B</p>
+            <p>{{response}}</p>
+            <p>{{currentTime}}</p>
         </div>
     </div>
     <div id="contentsBox">
@@ -15,15 +15,15 @@
         </div>
         <div class="weatherBox">
             <div class="weatherDegree">
-                <p>10&deg;</p>
+                <p>{{Math.round(currentTemp)}}&deg;</p>
             </div>
             <div class="weatherIcon">
                 <img src="@/assets/43.png" alt="MainLogo"/>
             </div>
             <div class="weatherData">
-                <div v-for="Temporary in TemporaryData" :key="Temporary.title" class="detailData">
-                    <p>{{ Temporary.title }}</p>
-                    <p>{{ Temporary.value }}</p>
+                <div v-for="temporary in temporaryData" :key="temporary.title" class="detailData">
+                    <p>{{ temporary.title }}</p>
+                    <p>{{ temporary.value }}</p>
                 </div>
             </div>
         </div>
@@ -34,16 +34,16 @@
             <p>이번주 날씨 보기</p>
         </div>
         <div class="timelyWeatherBox">
-            <div class="timelyWeather">
+            <div class="timelyWeather" v-for="(temp, index) in arrayTemps" :key="index">
                 <div class="icon">
                     <img src="@/assets/29.png" alt=""/>
                 </div>
                 <div class="data">
-                    <p class="time">12345</p>
-                    <p class="currentDegree">32&deg;</p>
+                    <p class="time">{{Unix_timestamp(temp.dt)}}</p>
+                    <p class="currentDegree">{{Math.round(temp.temp)}}&deg;</p>
                     <div>
                         <img src="@/assets/drop.png" alt="">
-                        <p class="fall">15%</p>
+                        <p class="fall">{{ temp.humidity }}%</p>
                     </div>
                 </div>
             </div>
@@ -59,11 +59,23 @@
 </template>
 
 <script>
+import axios from "axios";
+import dayjs from "dayjs";
+import "dayjs/locale/ko";
+dayjs.locale("ko");
+
 export default {
     data(){
         return {
-            //임시데이터
-            TemporaryData: [
+          //현재시간 - dayjs 플러그인
+          currentTime: dayjs().format("YYYY. MM. DD. ddd"),
+          //현재온도
+          currentTemp: "",
+          arrayTemps: [],
+          icons: [],
+          cityName: "",
+          //임시데이터
+          temporaryData: [
                 {
                     title: '습도',
                     value: '88%',
@@ -76,8 +88,41 @@ export default {
                     title: '풍향',
                     value: '88',
                 },
-            ]
+            ],
+            
         }
+    },
+    created(){
+        //https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&exclude={part}&appid={API_KEY}
+        //https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key}
+        const API_KEY = "0a3d99c5ee177ab490388f8b24b6ee12";
+        let initialLat = 36.5683;
+        let initialLon = 126.9778;
+        axios
+            .get(`https://api.openweathermap.org/data/2.5/forecast?lat=${initialLat}&lon=${initialLon}&appid=${API_KEY}`)
+            .then(response => {
+                console.log(response);
+                let initialCityName = response.data.timezone; 
+                this.cityName = initialCityName.split("/")[1];
+                this.currentTemp = response.data.temp;
+                this.temporaryData[0].value = response.data.current.humidity + "%";     //습도
+                this.temporaryData[1].value = response.data.current.wind_speed + "m/s"; //풍속
+                this.temporaryData[2].value = response.data.current.feels_like + "도";  //체감온도
+                //시간대별데이터 저장
+                for(let i=0; i<24; i++){
+                  this.arrayTemps[i] = response.data.hourly[i];
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    },
+    methods:{
+      Unix_timestamp(dt){
+        let date = new date(dt * 1000);
+        let hour = "0" + date.getHours();
+        return hour.substr(-2) + "시";
+      }
     }
 }
 </script>
