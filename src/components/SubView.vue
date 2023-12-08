@@ -74,38 +74,38 @@ export default {
         const API_KEY = process.env.WEATHER_API_KEY;
         let initialLat = 36.5683;
         let initialLon = 126.9778;
-        try {
-          const res = axios.get(`https://api.openweathermap.org/data/2.5/forecast?lat=${initialLat}&lon=${initialLon}&appid=${API_KEY}`);
-          let isInitialData = res.data.current;
-          let isInitialCityName = res.data.timezone;
-          let isFeelLikeTemp = isInitialData.feels_like;
-          let isTimeOfSunrise = isInitialData.sunrise;
-          let isTimeOfSunset = isInitialData.sunset;
-          let isLineOfSight = isInitialData.visibility;
-          
-          //데이터 가공
-          let isProcessedData = [
-            {name:"일출시간", value:Unix_timestamp(isTimeOfSunrise)},
-            {name:"일몰시간", value:Unix_timestamp(isTimeOfSunset)},
-            {name:"가시거리", value:isLineOfSight + "M"},
-          ];
-          //날씨데이터
-          subWeatherData.value = isProcessedData;
-          //도시명 설정
-          cityName.value = isInitialCityName.split("/")[1];
-          //날씨상태
-          if(isFeelLikeTemp > 30) feeling.value = "매우 더움";
-          else if(isFeelLikeTemp <=30) feeling.value = "더움";
-          else if(isFeelLikeTemp <=25) feeling.value = "보통";
-          else if(isFeelLikeTemp <=20) feeling.value = "선선함";
-          else if(isFeelLikeTemp <=15) feeling.value = "쌀쌀함";
-          else if(isFeelLikeTemp <=10) feeling.value = "추움";
-          else feeling.value = "매우 추움";
-
-        } catch (error) {
-          console.log("subView");
-          console.log(error);
-        }
+          axios.get(`https://api.openweathermap.org/data/2.5/forecast?lat=${initialLat}&lon=${initialLon}&appid=${API_KEY}`)
+          .then(res => {
+            let isInitialData = res.data.current;
+            let isInitialCityName = res.data.timezone;
+            let isFeelLikeTemp = isInitialData.feels_like;
+            let isTimeOfSunrise = isInitialData.sunrise;
+            let isTimeOfSunset = isInitialData.sunset;
+            let isLineOfSight = isInitialData.visibility;
+            
+            //데이터 가공
+            let isProcessedData = [
+              {name:"일출시간", value:Unix_timestamp(isTimeOfSunrise)},
+              {name:"일몰시간", value:Unix_timestamp(isTimeOfSunset)},
+              {name:"가시거리", value:isLineOfSight + "M"},
+            ];
+            //날씨데이터
+            subWeatherData.value = isProcessedData;
+            //도시명 설정
+            cityName.value = isInitialCityName.split("/")[1];
+            //날씨상태
+            if(isFeelLikeTemp > 30) feeling.value = "매우 더움";
+            else if(isFeelLikeTemp <=30) feeling.value = "더움";
+            else if(isFeelLikeTemp <=25) feeling.value = "보통";
+            else if(isFeelLikeTemp <=20) feeling.value = "선선함";
+            else if(isFeelLikeTemp <=15) feeling.value = "쌀쌀함";
+            else if(isFeelLikeTemp <=10) feeling.value = "추움";
+            else feeling.value = "매우 추움";
+          })
+          .catch(error=>{
+            console.log("subView");
+            console.log(error);
+          });
       };
       //호출
       fetchOpenWeather();
