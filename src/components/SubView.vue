@@ -71,7 +71,7 @@ export default {
       };
       //OpenApi Call
       const fetchOpenWeather = () =>{
-        const API_KEY = "0a3d99c5ee177ab490388f8b24b6ee12";
+        const API_KEY = process.env.WEATHER_API_KEY;
         let initialLat = 36.5683;
         let initialLon = 126.9778;
         try {
