@@ -65,6 +65,7 @@ import "dayjs/locale/ko";
 dayjs.locale("ko");
 
 export default {
+    //Options API
     data(){
         return {
           //현재시간 - dayjs 플러그인
@@ -101,7 +102,6 @@ export default {
         axios
             .get(`https://api.openweathermap.org/data/2.5/forecast?lat=${initialLat}&lon=${initialLon}&appid=${API_KEY}`)
             .then(response => {
-                console.log(response);
                 let initialCityName = response.data.timezone; 
                 this.cityName = initialCityName.split("/")[1];
                 this.currentTemp = response.data.temp;
@@ -114,7 +114,8 @@ export default {
                 }
             })
             .catch(error => {
-                console.log(error);
+              console.log("mainView");
+              console.log(error);
             });
     },
     methods:{

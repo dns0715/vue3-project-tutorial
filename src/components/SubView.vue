@@ -2,8 +2,8 @@
   <div class="rightContainer">
     <div id="cityNameBox">
         <div class="cityName">
-            <p>A</p>
-            <p>B</p>
+            <p>{{cityName}}</p>
+            <p>{{currentTime}}</p>
         </div>
     </div>
     <div id="contentsBox">
@@ -15,20 +15,20 @@
         </div>
         <div class="weatherBox">
             <div class="airCondition">
-                <p>매우 추움</p>
+                <p>{{feeling}}</p>
             </div>
             <div class="detail">
                 <div class="title">
                     <p>detail temperatures</p>
                 </div>
-                <div class="data">
+                <div class="data" v-for="(detailData, index) in subWeatherData" :key="index">
                     <div class="dataName">
                         <p></p>
-                        <p></p>
+                        <p>{{ detailData.name }}</p>
                     </div>
                     <div class="dataValue">
                         <p>
-                            <span></span> &deg;
+                            {{ detailData.value }}<span></span>
                         </p>
                     </div>
                 </div>
@@ -46,11 +46,76 @@
 </template>
 
 <script>
+import { ref } from "vue";
 import Map from "@/components/Map.vue";
+import axios from 'axios';
+import dayjs from "dayjs";
+import "dayjs/locale/ko";
+dayjs.locale("ko");
 export default {
     components: {
         Map,
     },
+    //Composition API
+    setup(){
+      let currentTime = dayjs().format("YYYY. MM. DD. ddd");
+      let cityName = ref("");
+      let feeling = ref("");
+      let subWeatherData = ref([]);
+
+      //Convert Time Unix-timestamp
+      const Unix_timestamp = (dt) => {
+        let date = new date(dt * 1000);
+        let hour = "0" + date.getHours();
+        return hour.substring(-2) + "시";
+      };
+      //OpenApi Call
+      const fetchOpenWeather = () =>{
+        const API_KEY = "0a3d99c5ee177ab490388f8b24b6ee12";
+        let initialLat = 36.5683;
+        let initialLon = 126.9778;
+        try {
+          const res = axios.get(`https://api.openweathermap.org/data/2.5/forecast?lat=${initialLat}&lon=${initialLon}&appid=${API_KEY}`);
+          let isInitialData = res.data.current;
+          let isInitialCityName = res.data.timezone;
+          let isFeelLikeTemp = isInitialData.feels_like;
+          let isTimeOfSunrise = isInitialData.sunrise;
+          let isTimeOfSunset = isInitialData.sunset;
+          let isLineOfSight = isInitialData.visibility;
+          
+          //데이터 가공
+          let isProcessedData = [
+            {name:"일출시간", value:Unix_timestamp(isTimeOfSunrise)},
+            {name:"일몰시간", value:Unix_timestamp(isTimeOfSunset)},
+            {name:"가시거리", value:isLineOfSight + "M"},
+          ];
+          //날씨데이터
+          subWeatherData.value = isProcessedData;
+          //도시명 설정
+          cityName.value = isInitialCityName.split("/")[1];
+          //날씨상태
+          if(isFeelLikeTemp > 30) feeling.value = "매우 더움";
+          else if(isFeelLikeTemp <=30) feeling.value = "더움";
+          else if(isFeelLikeTemp <=25) feeling.value = "보통";
+          else if(isFeelLikeTemp <=20) feeling.value = "선선함";
+          else if(isFeelLikeTemp <=15) feeling.value = "쌀쌀함";
+          else if(isFeelLikeTemp <=10) feeling.value = "추움";
+          else feeling.value = "매우 추움";
+
+        } catch (error) {
+          console.log("subView");
+          console.log(error);
+        }
+      };
+      //호출
+      fetchOpenWeather();
+      return {
+        currentTime,
+        cityName,
+        feeling,
+        subWeatherData,
+      };
+    }
 }
 </script>
 
