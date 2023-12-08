@@ -96,7 +96,7 @@ export default {
     created(){
         //https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&exclude={part}&appid={API_KEY}
         //https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key}
-        const API_KEY = process.env.WEATHER_API_KEY;
+        const API_KEY = process.env.VUE_APP_WEATHER_API_KEY;
         let initialLat = 36.5683;
         let initialLon = 126.9778;
         axios

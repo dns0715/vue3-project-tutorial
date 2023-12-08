@@ -71,9 +71,10 @@ export default {
       };
       //OpenApi Call
       const fetchOpenWeather = () =>{
-        const API_KEY = process.env.WEATHER_API_KEY;
+        const API_KEY = process.env.VUE_APP_WEATHER_API_KEY;
         let initialLat = 36.5683;
         let initialLon = 126.9778;
+        console.log(process.env);
           axios.get(`https://api.openweathermap.org/data/2.5/forecast?lat=${initialLat}&lon=${initialLon}&appid=${API_KEY}`)
           .then(res => {
             let isInitialData = res.data.current;
@@ -109,6 +110,7 @@ export default {
       };
       //호출
       fetchOpenWeather();
+
       return {
         currentTime,
         cityName,
