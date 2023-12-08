@@ -59,7 +59,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import * as weatherApi from "@/api/weatherApi";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 dayjs.locale("ko");
@@ -94,14 +94,10 @@ export default {
         }
     },
     created(){
-        //https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&exclude={part}&appid={API_KEY}
-        //https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key}
-        const API_KEY = process.env.VUE_APP_WEATHER_API_KEY;
         let initialLat = 36.5683;
         let initialLon = 126.9778;
-        axios
-            .get(`https://api.openweathermap.org/data/2.5/forecast?lat=${initialLat}&lon=${initialLon}&appid=${API_KEY}`)
-            .then(response => {
+        weatherApi.getWeatherData(initialLat, initialLon)
+          .then(response => {
                 let initialCityName = response.data.timezone; 
                 this.cityName = initialCityName.split("/")[1];
                 this.currentTemp = response.data.temp;
@@ -112,11 +108,11 @@ export default {
                 for(let i=0; i<24; i++){
                   this.arrayTemps[i] = response.data.hourly[i];
                 }
-            })
-            .catch(error => {
-              console.log("mainView");
-              console.log(error);
-            });
+          })
+          .catch(error => {
+            console.log("mainView");
+            console.log(error);
+          });
     },
     methods:{
       Unix_timestamp(dt){

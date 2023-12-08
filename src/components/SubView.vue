@@ -48,7 +48,7 @@
 <script>
 import { ref } from "vue";
 import Map from "@/components/Map.vue";
-import axios from 'axios';
+import * as weatherApi from "@/api/weatherApi";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 dayjs.locale("ko");
@@ -71,11 +71,10 @@ export default {
       };
       //OpenApi Call
       const fetchOpenWeather = () =>{
-        const API_KEY = process.env.VUE_APP_WEATHER_API_KEY;
         let initialLat = 36.5683;
         let initialLon = 126.9778;
-        console.log(process.env);
-          axios.get(`https://api.openweathermap.org/data/2.5/forecast?lat=${initialLat}&lon=${initialLon}&appid=${API_KEY}`)
+
+        weatherApi.getWeatherData(initialLat, initialLon)
           .then(res => {
             let isInitialData = res.data.current;
             let isInitialCityName = res.data.timezone;
@@ -83,7 +82,6 @@ export default {
             let isTimeOfSunrise = isInitialData.sunrise;
             let isTimeOfSunset = isInitialData.sunset;
             let isLineOfSight = isInitialData.visibility;
-            
             //데이터 가공
             let isProcessedData = [
               {name:"일출시간", value:Unix_timestamp(isTimeOfSunrise)},
